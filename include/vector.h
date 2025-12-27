@@ -1,6 +1,8 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <algorithm>
+
 class vector {
     private:
         size_t length;
@@ -8,8 +10,7 @@ class vector {
     public:
         // constructor incase for an empty vector
         vector(size_t size) : length(size) {
-            data = new double[length];
-            for (size_t i { 0 }; i < length; i++) data[i] = 0.0;
+            data = new double[length]();
         }
 
         // constructor for a non-empty vector
@@ -17,7 +18,7 @@ class vector {
         vector(double (&input)[N]) {
             length = N;
             data = new double[length];
-            for (size_t i { 0 }; i < length; i++) data[i] = input[i];
+            std::copy(std::begin(input), std::end(input), data);
         }
 
         ~vector() {
