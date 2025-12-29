@@ -94,7 +94,6 @@ namespace Lingebra {
 
                     for (std::size_t i { 0 }; i < nrows; i++) {
                         for (std::size_t j { 0 }; j < ncols; j++) {
-                            std::cout << data[i][j] << "+" << other.data[i][j] << " = " <<  data[i][j] + other.data[i][j] << std::endl;
                             sum[i][j] = data[i][j] + other.data[i][j];
                         }
                     }
