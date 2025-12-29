@@ -75,12 +75,12 @@ namespace Lingebra {
     };
 
     inline std::ostream& operator<<(std::ostream& out, const vector& v) {
-        out << "Vector([";
+        out << "[";
         for (std::size_t i { 0 }; i < v.length; i++) {
             out << v.data[i];
             if (i + 1 < v.length) out << ", ";
         }
-        out << "])";
+        out << "]";
 
         return out;
     }
