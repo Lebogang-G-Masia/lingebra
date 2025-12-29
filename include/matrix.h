@@ -1,11 +1,14 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef LINGEBRA_MATRIX_H
+#define LINGEBRA_MATRIX_H
 
 #include <initializer_list>
 #include <algorithm>
 #include <iostream>
 #include <cstddef>
+#include <string>
+#include <cstdlib>
 #include "vector.h"
+#include "error_handling.h"
 
 namespace Lingebra {
     class matrix {
@@ -73,11 +76,39 @@ namespace Lingebra {
                 other.nrows = 0;
                 other.ncols = 0;
 
+
                 return *this;
             }
 
-            vector& operator[](std::size_t i) { return data[i]; };
+            const vector shape() const noexcept {
+                return vector({static_cast<double>(nrows), static_cast<double>(ncols)});
+            }
 
+            matrix operator+(matrix other) {
+                matrix sum(nrows, ncols);
+
+                try {
+                    if (nrows != other.nrows || ncols != other.ncols) {
+                        throw AdditionException();
+                    }
+
+                    for (std::size_t i { 0 }; i < nrows; i++) {
+                        for (std::size_t j { 0 }; j < ncols; j++) {
+                            std::cout << data[i][j] << "+" << other.data[i][j] << " = " <<  data[i][j] + other.data[i][j] << std::endl;
+                            sum[i][j] = data[i][j] + other.data[i][j];
+                        }
+                    }
+                }
+
+                catch (AdditionException& ex) {
+                    std::cerr << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                return sum;
+            }
+
+
+            vector& operator[](std::size_t i) { return data[i]; };
             const vector& operator[](std::size_t i) const { return data[i]; }
 
             friend std::ostream& operator<<(std::ostream&, const matrix&);
@@ -90,9 +121,9 @@ namespace Lingebra {
             else out << "       " << mat.data[i];
             if (i + 1 < mat.nrows) out << ", " << std::endl;
         }
-        out << ")";
+        out << ")" << std::endl;
         return out;
-    }
+    };
 }
 
-#endif // MATRIX_H
+#endif // LINGEBRA_MATRIX_H
