@@ -71,6 +71,14 @@ namespace Lingebra {
             double& operator[](std::size_t i) { return data[i]; }
             const double& operator[](std::size_t i) const { return data[i]; }
 
+            bool operator==(const vector& other) {
+                return data == other.data;
+            }
+
+            bool operator !=(const vector& other) {
+                return !(data == other.data);
+            }
+
             friend std::ostream& operator<<(std::ostream&, const vector&);
     };
 

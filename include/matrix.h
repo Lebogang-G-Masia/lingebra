@@ -84,6 +84,8 @@ namespace Lingebra {
                 return vector({static_cast<double>(nrows), static_cast<double>(ncols)});
             }
 
+            // TODO: Write the following two functions in a one function
+
             matrix operator+(matrix other) {
                 matrix sum(nrows, ncols);
 
@@ -106,6 +108,28 @@ namespace Lingebra {
                 return sum;
             }
 
+
+            matrix operator-(matrix other) {
+                matrix diff(nrows, ncols);
+
+                try {
+                    if (nrows != other.nrows || ncols != ncols) {
+                        throw SubtractionException();
+                    }
+
+                    for (std::size_t i { 0 }; i < nrows; i++) {
+                        for (std::size_t j { 0 }; j < ncols; j++) {
+                            diff[i][j] = data[i][j] - other.data[i][j];
+                        }
+                    }
+                }
+
+                catch (SubtractionException& ex) {
+                    std::cerr << ex.what() << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                return diff;
+            }
 
             vector& operator[](std::size_t i) { return data[i]; };
             const vector& operator[](std::size_t i) const { return data[i]; }
