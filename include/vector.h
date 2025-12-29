@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef LINGEBRA_VECTOR_H
+#define LINGEBRA_VECTOR_H
 
 #include <algorithm>
 #include <cstddef>
@@ -86,4 +86,4 @@ namespace Lingebra {
     }
 }
 
-#endif // VECTOR_H
+#endif // LINGEBRA_VECTOR_H
