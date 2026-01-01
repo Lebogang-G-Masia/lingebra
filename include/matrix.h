@@ -131,6 +131,15 @@ namespace Lingebra {
                 return diff;
             }
 
+            matrix operator*(int scalar) {
+                matrix prod(nrows, ncols);
+                for (std::size_t i { 0 }; i < nrows; i++)
+                    for (std::size_t j { 0 }; j < ncols; j++)
+                        prod[i][j] = data[i][j] * scalar;
+
+                return prod;
+            }
+
             vector& operator[](std::size_t i) { return data[i]; };
             const vector& operator[](std::size_t i) const { return data[i]; }
 
