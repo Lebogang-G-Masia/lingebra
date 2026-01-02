@@ -125,7 +125,7 @@ namespace Lingebra {
                 }
 
                 catch (SubtractionException& ex) {
-                    std::cerr << ex.what() << ex.what() << std::endl;
+                    std::cerr << ex.what() << std::endl;
                     exit(EXIT_FAILURE);
                 }
                 return diff;
@@ -138,6 +138,29 @@ namespace Lingebra {
                         prod[i][j] = data[i][j] * scalar;
 
                 return prod;
+            }
+
+            matrix matmul(matrix other) {
+                matrix product(nrows, other.ncols);
+                try {
+                    if (ncols != other.nrows) throw MultiplicationException();    
+                    for (std::size_t r { 0 }; r < nrows; r++) {
+                        for (std::size_t c { 0 }; c < other.ncols; c++) {
+                            double sum { 0 };
+                            for (std::size_t i { 0 }; i < ncols; i++) {
+                                sum += data[r][i]*other.data[i][c];
+                            }
+                            product[r][c] = sum;
+                        }
+                    }
+                }
+
+                catch (MultiplicationException& ex) {
+                    std::cerr << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+
+                return product;
             }
 
             vector& operator[](std::size_t i) { return data[i]; };
