@@ -20,6 +20,14 @@ namespace Lingebra {
                 return "SubtractionException: Cannot subtract matrices of different dimensions.";
             }
     };
+
+    class MultiplicationException : public std::exception {
+        public:
+            MultiplicationException() {}
+            const char* what() const noexcept override {
+                return "MultiplicationException: Invalid input dimensions for matrix multiplication.";      
+            }
+    };
 }
 
 
