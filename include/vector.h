@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef LINGEBRA_VECTOR_H
+#define LINGEBRA_VECTOR_H
 
 #include <algorithm>
 #include <cstddef>
@@ -71,6 +71,14 @@ namespace Lingebra {
             double& operator[](std::size_t i) { return data[i]; }
             const double& operator[](std::size_t i) const { return data[i]; }
 
+            bool operator==(const vector& other) {
+                return data == other.data;
+            }
+
+            bool operator !=(const vector& other) {
+                return !(data == other.data);
+            }
+
             friend std::ostream& operator<<(std::ostream&, const vector&);
     };
 
@@ -86,4 +94,4 @@ namespace Lingebra {
     }
 }
 
-#endif // VECTOR_H
+#endif // LINGEBRA_VECTOR_H
