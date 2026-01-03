@@ -170,9 +170,8 @@ namespace Lingebra {
                 return product;
             }
 
-            static double determinant(matrix mat) {
+            static double determinant(matrix mat, std::size_t i=0) {
                 double det { 0.0 };
-                std::size_t i = 0;
                 if (mat.nrows == 2) det = (mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]);
                 else {
                     std::size_t row { 0 };
