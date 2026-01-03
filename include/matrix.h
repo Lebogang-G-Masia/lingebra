@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <string>
 #include <cstdlib>
+#include <cmath>
 #include "vector.h"
 #include "error_handling.h"
 
@@ -16,15 +17,18 @@ namespace Lingebra {
             std::size_t nrows;
             std::size_t ncols;
             vector* data;
+            bool is_square;
         public:
-            matrix() : nrows(0), ncols(0), data(nullptr) {}
+            matrix() : nrows(0), ncols(0), data(nullptr), is_square(false) {}
 
             matrix(std::size_t rows, std::size_t cols) : nrows(rows), ncols(cols) {
+                is_square = nrows == ncols ? true : false;
                 data = new vector[rows]();
                 for (std::size_t i { 0 }; i < rows; i++) data[i] = vector(cols);
             }
 
             matrix(std::initializer_list<vector> input) : nrows(input.size()), ncols(input.begin()->size()) {
+                is_square = nrows == ncols ? true : false;
                 data = new vector[input.size()];
                 std::copy(input.begin(), input.end(), data);
             }
@@ -38,12 +42,14 @@ namespace Lingebra {
 
             // 2.
             matrix(const matrix& other) : nrows(other.nrows), ncols(other.ncols) {
-                data = new vector[nrows];
+                is_square = nrows == ncols ? true : false;
+                data = new vector[nrows]();
                 std::copy(other.data, other.data + nrows, data);
             }
 
             // 3.
             matrix(matrix&& other) noexcept : nrows(other.nrows), ncols(other.ncols) {
+                is_square = nrows == ncols ? true : false;
                 data = other.data; 
                 other.data = nullptr;
                 other.nrows = 0;
@@ -52,6 +58,7 @@ namespace Lingebra {
 
             // 4.
             matrix& operator=(const matrix& other) {
+                is_square = nrows == ncols ? true : false;
                 if (this == &other) return *this;
                 vector* temp = new vector[other.nrows];
                 std::copy(other.data, other.data + other.nrows, temp);
@@ -71,7 +78,7 @@ namespace Lingebra {
                 data = other.data;
                 nrows = other.nrows;
                 ncols = other.ncols;
-
+                is_square = nrows == ncols ? true : false;
                 other.data = nullptr;
                 other.nrows = 0;
                 other.ncols = 0;
@@ -161,6 +168,43 @@ namespace Lingebra {
                 }
 
                 return product;
+            }
+
+            static double determinant(matrix mat) {
+                double det { 0.0 };
+                std::size_t i = 0;
+                if (mat.nrows == 2) det = (mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]);
+                else {
+                    std::size_t row { 0 };
+                    std::size_t col { 0 };
+                    for (std::size_t j { 0 }; j < mat.ncols; j++) {
+                        row = 0;
+                        matrix m(mat.nrows-1, mat.ncols-1);
+                        for (int r = 0; r < mat.nrows; r++) {
+                            col = 0;
+                            for (int c = 0; c < mat.ncols; c++) {
+                                if (r == i || c == j) continue;
+                                m[row][col] = mat[r][c];
+                                if (col == mat.ncols - 2) row += 1;
+                                else col += 1;
+                            }
+                        }
+                        det += std::pow(-1, i+j)*mat[i][j]*determinant(m);
+                    }
+                }
+                return det;
+            } 
+
+            matrix inverse() {
+                matrix inv(nrows, ncols);
+                
+                try {
+                    if (nrows != ncols) throw MatrixNotSquareException();
+                }
+
+                catch (MatrixNotSquareException& ex) {}
+
+                return inv;
             }
 
             vector& operator[](std::size_t i) { return data[i]; };
