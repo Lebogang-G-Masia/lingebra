@@ -225,13 +225,23 @@ namespace Lingebra {
                     }
                 }
                 return det;
-            } 
+            }
 
-            matrix inverse() {
-                matrix inv(nrows, ncols);
+            static matrix transpose(matrix mat) {
+                matrix T(mat.nrows, mat.ncols);
+                for (std::size_t i { 0 }; i < mat.nrows; i++)
+                    for (std::size_t j { 0 }; j < mat.ncols; j++)
+                        T[i][j] = mat[j][i];
+                return T;
+            }
+
+            static matrix inverse(matrix mat) {
+                matrix inv(mat.nrows, mat.ncols);
                 
                 try {
-                    if (nrows != ncols) throw MatrixNotSquareException();
+                    if (mat.nrows != mat.ncols) throw MatrixNotSquareException();
+                    double det = determinant(mat);
+                    if (det == 0) throw MatrixNotInvertibleException();
                 }
 
                 catch (MatrixNotSquareException& ex) {}
