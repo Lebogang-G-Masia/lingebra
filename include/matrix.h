@@ -14,15 +14,11 @@
 namespace Lingebra {
     class matrix {
         private:
-            //std::size_t nrows;
-            //std::size_t ncols;
+            std::size_t nrows;
+            std::size_t ncols;
             vector* data;
             bool is_square;
         public:
-            // START HERE
-            std::size_t nrows;
-            std::size_t ncols;
-            // END HERE
             matrix() : nrows(0), ncols(0), data(nullptr), is_square(false) {}
 
             matrix(std::size_t rows, std::size_t cols) : nrows(rows), ncols(cols) {
@@ -241,10 +237,22 @@ namespace Lingebra {
                 try {
                     if (mat.nrows != mat.ncols) throw MatrixNotSquareException();
                     double det = determinant(mat);
+                    std::cout << det << std::endl;
                     if (det == 0) throw MatrixNotInvertibleException();
+                    matrix C = cofactors(mat);
+
+                    inv = transpose(C)*(1/det);
                 }
 
-                catch (MatrixNotSquareException& ex) {}
+                catch (MatrixNotSquareException& ex) {
+                    std::cerr << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+
+                catch (MatrixNotInvertibleException& ex) {
+                    std::cerr << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
 
                 return inv;
             }
@@ -256,10 +264,26 @@ namespace Lingebra {
     };
 
     inline std::ostream& operator<<(std::ostream& out, const matrix& mat) {
+        const double tolerance = 1e-12;
+    
         out << "Matrix(";
         for (std::size_t i { 0 }; i < mat.nrows; i++) {
-            if (i == 0) out << mat.data[i];
-            else out << "       " << mat.data[i];
+            if (i != 0) out << "       ";
+        
+            out << "[";
+            for (std::size_t j { 0 }; j < mat.ncols; j++) {
+                double val = mat.data[i][j];
+            
+                if (std::abs(val) < tolerance) {
+                    out << 0;
+                } else {
+                    out << val;
+                }
+            
+                if (j + 1 < mat.ncols) out << ", ";
+            }
+            out << "]";
+
             if (i + 1 < mat.nrows) out << ", " << std::endl;
         }
         out << ")" << std::endl;
