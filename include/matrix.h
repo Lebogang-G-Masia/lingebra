@@ -93,7 +93,7 @@ namespace Lingebra {
 
             // TODO: Write the following two functions in a one function
 
-            matrix operator+(matrix other) {
+            const matrix operator+(const matrix& other) const {
                 matrix sum(nrows, ncols);
 
                 try {
@@ -116,7 +116,7 @@ namespace Lingebra {
             }
 
 
-            matrix operator-(matrix other) {
+            const matrix operator-(const matrix& other) const {
                 matrix diff(nrows, ncols);
 
                 try {
@@ -138,7 +138,7 @@ namespace Lingebra {
                 return diff;
             }
 
-            matrix operator*(double scalar) {
+            const matrix operator*(const double& scalar) const {
                 matrix prod(nrows, ncols);
                 for (std::size_t i { 0 }; i < nrows; i++)
                     for (std::size_t j { 0 }; j < ncols; j++)
@@ -147,7 +147,7 @@ namespace Lingebra {
                 return prod;
             }
 
-            matrix matmul(matrix other) {
+            const matrix matmul(const matrix& other) const {
                 matrix product(nrows, other.ncols);
                 try {
                     if (ncols != other.nrows) throw MultiplicationException();    
@@ -172,7 +172,7 @@ namespace Lingebra {
 
             // TODO: Remove the code repetition in the determinant and cofactor code
             
-            static matrix cofactors(matrix mat) {
+            static const matrix cofactors(const matrix& mat) const {
                 matrix C(mat.nrows, mat.ncols);
 
                 std::size_t row { 0 };
@@ -198,7 +198,7 @@ namespace Lingebra {
                 return C;
             }
 
-            static double determinant(matrix mat, std::size_t i=0) {
+            static const double determinant(const matrix& mat, const std::size_t& i=0) const {
                 double det { 0.0 };
                 if (mat.nrows == 2) det = (mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]);
                 else {
@@ -223,7 +223,7 @@ namespace Lingebra {
                 return det;
             }
 
-            static matrix transpose(matrix mat) {
+            static const matrix transpose(const matrix& mat) const {
                 matrix T(mat.nrows, mat.ncols);
                 for (std::size_t i { 0 }; i < mat.nrows; i++)
                     for (std::size_t j { 0 }; j < mat.ncols; j++)
@@ -231,7 +231,7 @@ namespace Lingebra {
                 return T;
             }
 
-            static matrix inverse(matrix mat) {
+            static const matrix inverse(const matrix& mat) const {
                 matrix inv(mat.nrows, mat.ncols);
                 
                 try {
