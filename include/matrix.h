@@ -14,11 +14,15 @@
 namespace Lingebra {
     class matrix {
         private:
-            std::size_t nrows;
-            std::size_t ncols;
+            //std::size_t nrows;
+            //std::size_t ncols;
             vector* data;
             bool is_square;
         public:
+            // START HERE
+            std::size_t nrows;
+            std::size_t ncols;
+            // END HERE
             matrix() : nrows(0), ncols(0), data(nullptr), is_square(false) {}
 
             matrix(std::size_t rows, std::size_t cols) : nrows(rows), ncols(cols) {
@@ -138,7 +142,7 @@ namespace Lingebra {
                 return diff;
             }
 
-            matrix operator*(int scalar) {
+            matrix operator*(double scalar) {
                 matrix prod(nrows, ncols);
                 for (std::size_t i { 0 }; i < nrows; i++)
                     for (std::size_t j { 0 }; j < ncols; j++)
@@ -170,6 +174,34 @@ namespace Lingebra {
                 return product;
             }
 
+            // TODO: Remove the code repetition in the determinant and cofactor code
+            
+            static matrix cofactors(matrix mat) {
+                matrix C(mat.nrows, mat.ncols);
+
+                std::size_t row { 0 };
+                std::size_t col { 0 };
+
+                for (std::size_t i { 0 }; i < mat.nrows; i++) {
+                    for (std::size_t j { 0 }; j < mat.ncols; j++) {
+                        row = 0;
+                        matrix m(mat.nrows-1, mat.ncols-1);
+                        for (std::size_t r { 0 }; r < mat.nrows; r++) {
+                            col = 0;
+                            for (std::size_t c { 0 }; c < mat.ncols; c++) {
+                                if (r == i || c == j) continue;
+                                m[row][col] = mat[r][c];
+                                if (col == mat.ncols - 2) row += 1;
+                                else col += 1;
+                            }
+                        }
+                        double s = std::pow(-1, i+j)*determinant(m);
+                        C[i][j] = s; 
+                    }
+                }
+                return C;
+            }
+
             static double determinant(matrix mat, std::size_t i=0) {
                 double det { 0.0 };
                 if (mat.nrows == 2) det = (mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]);
@@ -189,6 +221,7 @@ namespace Lingebra {
                             }
                         }
                         det += std::pow(-1, i+j)*mat[i][j]*determinant(m);
+                        //std::cout << det << std::endl;
                     }
                 }
                 return det;
