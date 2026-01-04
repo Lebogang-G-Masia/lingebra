@@ -28,6 +28,22 @@ namespace Lingebra {
                 return "MultiplicationException: Invalid input dimensions for matrix multiplication.";      
             }
     };
+
+    class MatrixNotSquareException: public std::exception {
+        public:
+            MatrixNotSquareException() {}
+            const char* what() const noexcept override {
+                return "MatrixNotSquareException: The matrix is not square";
+            }
+    };
+
+    class MatrixNotInvertibleException: public std::exception {
+        public:
+            MatrixNotInvertibleException() {}
+            const char* what() const noexcept override {
+                return "MatrixNotInvertibleExption: The matrix is not invertible";
+            }
+    };
 }
 
 
