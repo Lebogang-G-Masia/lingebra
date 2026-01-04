@@ -138,7 +138,7 @@ namespace Lingebra {
                 return diff;
             }
 
-            matrix operator*(int scalar) {
+            matrix operator*(double scalar) {
                 matrix prod(nrows, ncols);
                 for (std::size_t i { 0 }; i < nrows; i++)
                     for (std::size_t j { 0 }; j < ncols; j++)
@@ -170,6 +170,34 @@ namespace Lingebra {
                 return product;
             }
 
+            // TODO: Remove the code repetition in the determinant and cofactor code
+            
+            static matrix cofactors(matrix mat) {
+                matrix C(mat.nrows, mat.ncols);
+
+                std::size_t row { 0 };
+                std::size_t col { 0 };
+
+                for (std::size_t i { 0 }; i < mat.nrows; i++) {
+                    for (std::size_t j { 0 }; j < mat.ncols; j++) {
+                        row = 0;
+                        matrix m(mat.nrows-1, mat.ncols-1);
+                        for (std::size_t r { 0 }; r < mat.nrows; r++) {
+                            col = 0;
+                            for (std::size_t c { 0 }; c < mat.ncols; c++) {
+                                if (r == i || c == j) continue;
+                                m[row][col] = mat[r][c];
+                                if (col == mat.ncols - 2) row += 1;
+                                else col += 1;
+                            }
+                        }
+                        double s = std::pow(-1, i+j)*determinant(m);
+                        C[i][j] = s; 
+                    }
+                }
+                return C;
+            }
+
             static double determinant(matrix mat, std::size_t i=0) {
                 double det { 0.0 };
                 if (mat.nrows == 2) det = (mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]);
@@ -189,19 +217,42 @@ namespace Lingebra {
                             }
                         }
                         det += std::pow(-1, i+j)*mat[i][j]*determinant(m);
+                        //std::cout << det << std::endl;
                     }
                 }
                 return det;
-            } 
+            }
 
-            matrix inverse() {
-                matrix inv(nrows, ncols);
+            static matrix transpose(matrix mat) {
+                matrix T(mat.nrows, mat.ncols);
+                for (std::size_t i { 0 }; i < mat.nrows; i++)
+                    for (std::size_t j { 0 }; j < mat.ncols; j++)
+                        T[i][j] = mat[j][i];
+                return T;
+            }
+
+            static matrix inverse(matrix mat) {
+                matrix inv(mat.nrows, mat.ncols);
                 
                 try {
-                    if (nrows != ncols) throw MatrixNotSquareException();
+                    if (mat.nrows != mat.ncols) throw MatrixNotSquareException();
+                    double det = determinant(mat);
+                    std::cout << det << std::endl;
+                    if (det == 0) throw MatrixNotInvertibleException();
+                    matrix C = cofactors(mat);
+
+                    inv = transpose(C)*(1/det);
                 }
 
-                catch (MatrixNotSquareException& ex) {}
+                catch (MatrixNotSquareException& ex) {
+                    std::cerr << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+
+                catch (MatrixNotInvertibleException& ex) {
+                    std::cerr << ex.what() << std::endl;
+                    exit(EXIT_FAILURE);
+                }
 
                 return inv;
             }
@@ -213,10 +264,26 @@ namespace Lingebra {
     };
 
     inline std::ostream& operator<<(std::ostream& out, const matrix& mat) {
+        const double tolerance = 1e-12;
+    
         out << "Matrix(";
         for (std::size_t i { 0 }; i < mat.nrows; i++) {
-            if (i == 0) out << mat.data[i];
-            else out << "       " << mat.data[i];
+            if (i != 0) out << "       ";
+        
+            out << "[";
+            for (std::size_t j { 0 }; j < mat.ncols; j++) {
+                double val = mat.data[i][j];
+            
+                if (std::abs(val) < tolerance) {
+                    out << 0;
+                } else {
+                    out << val;
+                }
+            
+                if (j + 1 < mat.ncols) out << ", ";
+            }
+            out << "]";
+
             if (i + 1 < mat.nrows) out << ", " << std::endl;
         }
         out << ")" << std::endl;
