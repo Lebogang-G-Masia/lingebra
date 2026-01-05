@@ -91,14 +91,12 @@ namespace Lingebra {
                 return vector({static_cast<double>(nrows), static_cast<double>(ncols)});
             }
 
-            // TODO: Write the following two functions in a one function
-
-            matrix operator+(matrix other) {
+            const matrix operator+(const matrix& other) const {
                 matrix sum(nrows, ncols);
 
                 try {
                     if (nrows != other.nrows || ncols != other.ncols) {
-                        throw AdditionException();
+                        throw ArithmeticException();
                     }
 
                     for (std::size_t i { 0 }; i < nrows; i++) {
@@ -108,7 +106,7 @@ namespace Lingebra {
                     }
                 }
 
-                catch (AdditionException& ex) {
+                catch (ArithmeticException& ex) {
                     std::cerr << ex.what() << std::endl;
                     exit(EXIT_FAILURE);
                 }
@@ -116,29 +114,15 @@ namespace Lingebra {
             }
 
 
-            matrix operator-(matrix other) {
-                matrix diff(nrows, ncols);
-
-                try {
-                    if (nrows != other.nrows || ncols != ncols) {
-                        throw SubtractionException();
-                    }
-
-                    for (std::size_t i { 0 }; i < nrows; i++) {
-                        for (std::size_t j { 0 }; j < ncols; j++) {
-                            diff[i][j] = data[i][j] - other.data[i][j];
-                        }
-                    }
-                }
-
-                catch (SubtractionException& ex) {
-                    std::cerr << ex.what() << std::endl;
-                    exit(EXIT_FAILURE);
-                }
-                return diff;
+            const matrix operator-() const {
+                return *this*-1;
             }
 
-            matrix operator*(double scalar) {
+            const matrix operator-(const matrix& other) const {
+                return *this + -other;
+            }
+
+            const matrix operator*(const double& scalar) const {
                 matrix prod(nrows, ncols);
                 for (std::size_t i { 0 }; i < nrows; i++)
                     for (std::size_t j { 0 }; j < ncols; j++)
@@ -147,7 +131,7 @@ namespace Lingebra {
                 return prod;
             }
 
-            matrix matmul(matrix other) {
+            const matrix matmul(const matrix& other) const {
                 matrix product(nrows, other.ncols);
                 try {
                     if (ncols != other.nrows) throw MultiplicationException();    
@@ -172,7 +156,7 @@ namespace Lingebra {
 
             // TODO: Remove the code repetition in the determinant and cofactor code
             
-            static matrix cofactors(matrix mat) {
+            static const matrix cofactors(const matrix& mat) {
                 matrix C(mat.nrows, mat.ncols);
 
                 std::size_t row { 0 };
@@ -198,7 +182,7 @@ namespace Lingebra {
                 return C;
             }
 
-            static double determinant(matrix mat, std::size_t i=0) {
+            static const double determinant(const matrix mat, const std::size_t i=0) {
                 double det { 0.0 };
                 if (mat.nrows == 2) det = (mat[0][0]*mat[1][1]) - (mat[0][1]*mat[1][0]);
                 else {
