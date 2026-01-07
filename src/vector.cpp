@@ -1,19 +1,37 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include <cstdlib>
 
 #include "../include/vector.h"
 
 namespace Lingebra {
+    // memory management
+    double* Vector::allocate_aligned(std::size_t count) {
+        if (count == 0) return nullptr;
+        std::size_t bytes = count * sizeof(double);
+
+        std::size_t padded_bytes = (bytes + 31) & ~31;
+
+        void* ptr = std::aligned_alloc(32, padded_bytes);
+        if (!ptr) throw std::bad_alloc();
+
+        return static_cast<double*>(ptr);
+    }
+
+    void Vector::free_aligned(double* ptr) {
+        std::free(ptr);
+    }
+
     // Constructors
     Vector::Vector() : length(0), data(nullptr) {}
 
     Vector::Vector(std::size_t size) : length(size) {
-        data = new double[size];
+        data = allocate_aligned(size);
     }
 
     Vector::Vector(std::initializer_list<double> input) : length(input.size()) {
-        data = new double[input.size()];
+        data = allocate_aligned(input.size());
         std::copy(input.begin(), input.end(), data);
     }
 
@@ -21,11 +39,11 @@ namespace Lingebra {
 
     // 1.
     Vector::~Vector() {
-        delete[] data;
+        free_aligned(data);
     }
     // 2.
     Vector::Vector(const Vector& other) : length(other.length) {
-        data = new double[other.length];
+        data = allocate_aligned(other.length);
         std::copy(other.data, other.data + other.length, data);
     }
     // 3.
@@ -41,9 +59,9 @@ namespace Lingebra {
             std::copy(other.data, other.data + other.length, data);
             return *this;
         }
-        double* temp = new double[other.length];
+        double* temp = allocate_aligned(other.length);
         std::copy(other.data, other.data + other.length, temp);
-        delete[] data;
+        free_aligned(data);
         data = temp;
         length = other.length;
         return *this;
@@ -51,7 +69,7 @@ namespace Lingebra {
     // 5.
     Vector& Vector::operator=(Vector&& other) noexcept {
         if (this == &other) return *this;
-        delete[] data;
+        free_aligned(data);
         data = other.data;
         length = other.length;
         other.data = nullptr;
