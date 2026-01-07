@@ -8,8 +8,12 @@
 namespace Lingebra {
     class Vector {
         private:
+            // member variables
             std::size_t length;
             double* data;
+            // memory management stuff
+            static double* allocate_aligned(std::size_t count);
+            static void free_aligned(double* ptr);
         public:
             // Constructors
             Vector();
