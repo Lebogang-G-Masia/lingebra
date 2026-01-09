@@ -44,6 +44,10 @@ namespace Lingebra {
             
             const double& at(std::size_t) const;
 
+            // an easy easy way to retrieve data
+            double* data_ptr() { return data; }
+            const double* data_ptr() const { return data; }
+
             // Friends
             friend std::ostream& operator<<(std::ostream&, const Vector&);
     };
