@@ -31,6 +31,9 @@ namespace Lingebra {
             Matrix transpose() const;
             Matrix inverse() const;
 
+            double* data_ptr();
+            const double* data_ptr() const;
+            
             double& operator()(std::size_t i, std::size_t j);
             const double& operator()(std::size_t i, std::size_t j) const;
 
