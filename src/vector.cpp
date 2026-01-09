@@ -28,6 +28,7 @@ namespace Lingebra {
 
     Vector::Vector(std::size_t size) : length(size) {
         data = allocate_aligned(size);
+        std::fill(data, data+length, 0.0);
     }
 
     Vector::Vector(std::initializer_list<double> input) : length(input.size()) {
