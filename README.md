@@ -1,98 +1,62 @@
 # Lingebra
 
-A lightweight, header-only C++ linear algebra library for matrix and vector manipulations. **Lingebra** provides an intuitive API for standard mathematical operations while ensuring efficient memory management through a strict implementation of the **Rule of Five**.
+**Lingebra** is a high-performance, lightweight linear algebra library written in C++20. It features custom memory management, AVX-friendly data structures, and optimized algorithms for matrix operations.
 
----
+## Key Features
 
-## Features
+* **High-Performance Matrix Multiplication**: Implements the **IKJ loop interchange algorithm** to maximize CPU cache locality, achieving $O(N^3)$ performance.
+* **Optimized Memory Layout**: 
+    * Uses a **flat 1D array** representation for matrices to ensure spatial locality.
+    * Custom `Vector` container uses **32-byte memory alignment** (via `aligned_alloc`), enabling the compiler to auto-vectorize loops (AVX/SIMD).
+* **Fast Inversion & Determinants**: Replaces naive $O(N!)$ Laplace expansion with **LU Decomposition** ( $O(N^3)$ ) for instant calculations on large matrices.
+* **Modern C++ Design**:
+    * Implements the **Rule of Five** for efficient resource management (Move Semantics).
+    * RAII-compliant memory safety.
+    * No external dependencies (Standard Library only).
 
-* **Header-Only**: Easy to integrate into any project.
-* **Memory Managed**: Full support for Copy/Move semantics to prevent leaks and optimize performance.
-* **Intuitive Syntax**: Operator overloading for matrix addition, subtraction, and scalar multiplication.
-* **Advanced Operations**: 
-    * Matrix Multiplication (`matmul`)
-    * Recursive Determinant calculation
-    * Cofactor Matrix generation
-    * Transposition
-    * Matrix Inversion (using Adjugate method)
-* **Exception Safety**: Robust error handling for arithmetic and dimension mismatches (e.g., non-square matrices for inversion).
-* **Clean Output**: Overloaded `<<` operator with a built-in tolerance for floating-point precision.
+## Build & Installation
 
----
+Lingebra is a source-based library. To use it, simply include the headers and compile the source files with your project.
 
-## Usage
+### Requirements
+* C++ Compiler supporting C++17 or later (e.g., GCC, Clang, MSVC).
+* Optimization flags (e.g., `-O3`) are highly recommended to enable vectorization.
 
-### 1. Initialization
-You can initialize matrices by dimensions or via nested initializer lists.
+### Compilation:
 
-```cpp
-#include "matrix.h"
-
-using namespace Lingebra;
-
-// Initialize a 3x3 matrix
-matrix A = {
-    {1.0, 2.0, 3.0},
-    {0.0, 1.0, 4.0},
-    {5.0, 6.0, 0.0}
-};
-
-// Access elements
-double val = A[0][2]; // 3.0
-```
-
-### 2. Basic arithmetic
-
-The library supports standard matrix algebra operations.
+To compile a project using Lingebra:
 
 ```cpp
-matrix B = A * 2.0;       // Scalar multiplication
-matrix C = A + B;         // Addition
-matrix D = A.matmul(B);   // Matrix Multiplication
+# Recommended: Enable O3 optimization for SIMD/AVX support
+g++ main.cpp src/matrix.cpp src/vector.cpp -O3 -o my_app
 ```
 
-### 3. Linear algebra functions
+## API Reference
 
-Perform complex operations with static methods.
+### Class: `Lingebra::Matrix`
 
-```cpp
-try {
-    double det = matrix::determinant(A);
-    matrix inv = matrix::inverse(A);
-    matrix trans = matrix::transpose(A);
-
-    std::cout << "Inverse of A:\n" << inv;
-} catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-}
-```
-
-## API reference
-
-### Constructors & Memory
-| Method | Description |
-| :--- | :--- |
-| **Constructor** | Creates a matrix of specific dimensions or from nested lists. |
-| **Rule of Five** | Includes Copy/Move constructors and Assignment operators. |
-| **Destructor** | Safely deallocates the underlying vector array. |
-
-### Core Matrix Methods
-| Method | Description |
-| :--- | :--- |
-| **shape()** | Returns a vector with dimensions `[rows, cols]`. |
-| **matmul(other)** | Performs dot product multiplication between two matrices. |
-| **transpose(mat)** | Static method that returns the transposed version of a matrix. |
-| **determinant(mat)** | Static method that returns the scalar determinant. |
-| **inverse(mat)** | Static method that returns the inverse matrix. |
+| Method / Operator | Signature | Description |
+|------------------|-----------|-------------|
+| Constructor | `Matrix(size_t r, size_t c)` | Initializes a matrix of dimensions **r × c** filled with zeros. |
+| Constructor | `Matrix({ {v1, v2}, ... })` | Initializes a matrix from a nested initializer list (e.g., `{{1,2}, {3,4}}`). |
+| Shape | `Vector shape()` | Returns a vector containing `{nrows, ncols}`. |
+| Multiplication | `Matrix matmul(const Matrix& B)` | Performs matrix multiplication (**A × B**) using the optimized **IKJ algorithm**. |
+| Determinant | `double determinant()` | Calculates the determinant using **LU Decomposition** *(O(N³))* |
+| Inverse | `Matrix inverse()` | Calculates the inverse matrix using **LU Decomposition** and **Back Substitution**. |
+| Transpose | `Matrix transpose()` | Returns a new matrix that is the transpose of the current one. |
+| Cofactors | `Matrix cofactors()` | Returns the cofactor matrix (derived efficiently via **Inverse**). |
+| Access | `double& operator()(i, j)` | Logical element access (row *i*, column *j*). |
+| Raw Access | `double* data_ptr()` | Returns a raw pointer to the underlying flat 1D array (useful for optimizations). |
+| Arithmetic | `+, -, +=, -=` | Standard element-wise matrix addition and subtraction. |
+| Scaling | `*, *=` | Scalar multiplication (`Matrix * double`). |
 
 ---
 
-## Requirements
+## Performance
 
-* **C++ Standard**: C++11 or higher.
-* **Internal Dependencies**: Requires `vector.h` and `error_handling.h`.
-
----
-
-## License
-This project is open-source. Feel free to use and modify for your own linear algebra needs.
+| Operation | Naive Implementation | Lingebra Implementation |
+|----------|---------------------|-------------------------|
+| Multiplication | O(N³) *(Cache Miss Heavy)* | O(N³) *(Cache Friendly / IKJ)* |
+| Determinant | O(N!) *(Laplace Expansion)* | O(N³) *(LU Decomposition)* |
+| Inverse | O(N!) *(Cofactors)* | O(N³) *(LU + Substitution)* |
+| Memory Access | Pointer-to-Pointer (`double**`) | Contiguous Aligned Flat Array |
