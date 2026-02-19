@@ -1,3 +1,6 @@
+#ifndef LINGEBRA_VECTOR_H
+#define LINGEBRA_VECTOR_H
+
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
@@ -109,3 +112,5 @@ namespace Lingebra {
         return out;
     }
 }
+
+#endif // LINGEBRA_VECTOR_H
