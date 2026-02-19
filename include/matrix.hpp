@@ -218,19 +218,19 @@ namespace Lingebra {
                 return inv.transpose() * det;
             }
 
-            std::ostream& operator<<(std::ostream& out, const Matrix& m) {
+            std::ostream& operator<<(std::ostream& out) {
                 const double tolerance = 1e-10;
                 out << "Matrix(\n";
-                for (std::size_t i { 0 }; i < m.nrows; i++) {
+                for (std::size_t i { 0 }; i < nrows; i++) {
                     out << "  [";
-                    for (std::size_t j { 0 }; j < m.ncols; j++) {
-                        double val = m.data[i * m.ncols + j];
+                    for (std::size_t j { 0 }; j < ncols; j++) {
+                        double val = data[i * ncols + j];
                         if (std::abs(val) < tolerance) val = 0.0;
                         out << val; 
-                        if (j + 1 < m.ncols) out << ", ";
+                        if (j + 1 < ncols) out << ", ";
                     }
                     out << "]";
-                    if (i + 1 < m.nrows) out << ",\n";
+                    if (i + 1 < nrows) out << ",\n";
                 }
                 out << "\n)";
                 return out;

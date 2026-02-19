@@ -11,6 +11,7 @@ namespace Lingebra {
         private:
             std::size_t length;
             double* data;
+
             double* allocate_aligned(std::size_t count) {
                 if (count == 0) return nullptr;
                 std::size_t bytes = count * sizeof(double);
@@ -103,11 +104,14 @@ namespace Lingebra {
                 return data[i];
             }
 
-            std::ostream& operator<<(std::ostream& out, const Vector& v) {
+            double* data_ptr() { return data; }
+            const double* data_ptr() const { return data; }
+
+            std::ostream& operator<<(std::ostream& out) {
                 out << '[';
-                for (std::size_t i { 0 }; i < v.length; i++) {
-                    out << v.data[i];
-                    if (i + 1 < v.length) out << ", ";
+                for (std::size_t i { 0 }; i < length; i++) {
+                    out << data[i];
+                    if (i + 1 < length) out << ", ";
                 }
                 out << ']';
 
