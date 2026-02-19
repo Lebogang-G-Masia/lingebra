@@ -1,7 +1,7 @@
 #ifndef LINGEBRA_MATRIX_H
 #define LINGEBRA_MATRIX_H
 
-#include "vector.h"
+#include "vector.hpp"
 #include <cmath>
 #include <iostream>
 #include <vector>
