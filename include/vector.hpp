@@ -1,9 +1,10 @@
+#ifndef LINGEBRA_VECTOR_H
+#define LINGEBRA_VECTOR_H
+
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
 #include <cstdlib>
-
-#include "../include/vector.h"
 
 namespace Lingebra {
     // memory management
@@ -109,3 +110,5 @@ namespace Lingebra {
         return out;
     }
 }
+
+#endif // LINGEBRA_VECTOR_H

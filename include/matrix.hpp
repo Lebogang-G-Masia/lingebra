@@ -1,4 +1,7 @@
-#include "../include/matrix.h"
+#ifndef LINGEBRA_MATRIX_H
+#define LINGEBRA_MATRIX_H
+
+#include "vector.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -227,3 +230,5 @@ namespace Lingebra {
         return out;
     }
 }
+
+#endif // LINGEBRA_MATRIX_H
