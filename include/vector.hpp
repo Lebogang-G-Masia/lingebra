@@ -10,7 +10,7 @@ namespace Lingebra {
     class Vector {
         private:
             std::size_t length;
-            double* Vector data;
+            double* data;
             double* allocate_aligned(std::size_t count) {
                 if (count == 0) return nullptr;
                 std::size_t bytes = count * sizeof(double);
