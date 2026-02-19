@@ -1,6 +1,3 @@
-#ifndef LINGEBRA_MATRIX_H
-#define LINGEBRA_MATRIX_H
-
 #include "../include/matrix.h"
 #include <cmath>
 #include <iostream>
@@ -230,6 +227,3 @@ namespace Lingebra {
         return out;
     }
 }
-
-
-#endif // LINGEBRA_MATRIX_H
