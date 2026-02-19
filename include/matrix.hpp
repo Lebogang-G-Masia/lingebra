@@ -235,7 +235,7 @@ namespace Lingebra {
                 out << "\n)";
                 return out;
             }
-        };
+    };
 }
 
 
