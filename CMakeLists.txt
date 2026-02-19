@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
-project(lingebra_project)
+project(lingebra)
 
 add_library(lingebra 
     include/matrix.hpp 
-    include/tensor.hpp
+    include/vector.hpp
 )
 
 target_include_directories(lingebra PUBLIC 
