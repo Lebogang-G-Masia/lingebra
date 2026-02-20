@@ -77,6 +77,41 @@ namespace Lingebra {
                     for (double val: row_list)
                         data[i++] = val;
             }
+
+            ~Matrix() {
+            }
+
+            Matrix(const Matrix& other) :
+                nrows(other.nrows), 
+                ncols(other.ncols),
+                data(other.data) {}
+
+            Matrix (Matrix&& other) : 
+                nrows(other.nrows),
+                ncols(other.ncols),
+                data(std::move(other.data)) {
+                    other.nrows = 0;
+                    other.ncols = 0;
+                }
+
+            Matrix& operator=(const Matrix& other) {
+                if (this == &other) return *this;
+                if (other.nrows == nrows && other.ncols == ncols) {
+                    Matrix temp(other);
+                    std::swap(*this, temp);
+                }
+                return *this;
+            }
+
+            Matrix& operator=(Matrix&& other) noexcept {
+                if (this == &other) return *this;
+                data = std::move(other.data);
+                nrows = other.nrows;
+                ncols = other.ncols;
+                other.nrows = 0;
+                other.ncols = 0;
+                return *this;
+            }
             
             const Vector shape() const noexcept {
                 return Vector{static_cast<double>(nrows), static_cast<double>(ncols)};
