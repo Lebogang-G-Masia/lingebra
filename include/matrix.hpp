@@ -77,16 +77,22 @@ namespace Lingebra {
                     for (double val: row_list)
                         data[i++] = val;
             }
-
-            ~Matrix() {
+            
+            Matrix(std::vector<double> input) : nrows(input.size()), ncols(1) {
+                for (std::size_t i = 0; i < input.size(); i++) {
+                    data[i] = input[i];
+                }
             }
 
-            Matrix(const Matrix& other) :
-                nrows(other.nrows), 
-                ncols(other.ncols),
-                data(other.data) {}
+            ~Matrix() {}
 
-            Matrix (Matrix&& other) : 
+            Matrix(const Matrix& other) : 
+                nrows(other.nrows),
+                ncols(other.ncols),
+                data(other.data) 
+        {}
+
+            Matrix(Matrix&& other) noexcept :
                 nrows(other.nrows),
                 ncols(other.ncols),
                 data(std::move(other.data)) {
@@ -94,16 +100,16 @@ namespace Lingebra {
                     other.ncols = 0;
                 }
 
-            Matrix& operator=(const Matrix& other) {
+            Matrix operator=(const Matrix& other) {
                 if (this == &other) return *this;
                 if (other.nrows == nrows && other.ncols == ncols) {
-                    Matrix temp(other);
-                    std::swap(*this, temp);
+                    Matrix tmp(other);
+                    std::swap(*this, tmp);
                 }
                 return *this;
             }
 
-            Matrix& operator=(Matrix&& other) noexcept {
+            Matrix operator=(Matrix&& other) noexcept {
                 if (this == &other) return *this;
                 data = std::move(other.data);
                 nrows = other.nrows;
@@ -253,7 +259,7 @@ namespace Lingebra {
                 return inv.transpose() * det;
             }
 
-            friend std::ostream& operator<<(std::ostream& out, const Matrix& m) {
+            friend std::ostream& operator<<(std::ostream& out, const Matrix m) {
                 const double tolerance = 1e-10;
                 out << "Matrix(\n";
                 for (std::size_t i { 0 }; i < m.nrows; i++) {
