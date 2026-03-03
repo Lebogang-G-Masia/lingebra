@@ -7,24 +7,25 @@
 #include <cstdlib>
 
 namespace Lingebra {
+    template<typename T>
     class Vector {
         private:
             std::size_t length;
-            double* data;
+            T* data;
 
-            double* allocate_aligned(std::size_t count) {
+            T* allocate_aligned(std::size_t count) {
                 if (count == 0) return nullptr;
-                std::size_t bytes = count * sizeof(double);
+                std::size_t bytes = count * sizeof(T);
 
                 std::size_t padded_bytes = (bytes + 31) & ~31;
 
                 void* ptr = std::aligned_alloc(32, padded_bytes);
                 if (!ptr) throw std::bad_alloc();
 
-                return static_cast<double*>(ptr);
+                return static_cast<T*>(ptr);
             }
 
-            void free_aligned(double* ptr) {
+            void free_aligned(T* ptr) {
                 std::free(ptr);
             }
         
@@ -37,7 +38,7 @@ namespace Lingebra {
                 std::fill(data, data+length, 0.0);
             }
 
-            Vector(std::initializer_list<double> input) : length(input.size()) {
+            Vector(std::initializer_list<T> input) : length(input.size()) {
                 data = allocate_aligned(input.size());
                 std::copy(input.begin(), input.end(), data);
             }
@@ -66,7 +67,7 @@ namespace Lingebra {
                     std::copy(other.data, other.data + other.length, data);
                     return *this;
                 }
-                double* temp = allocate_aligned(other.length);
+                T* temp = allocate_aligned(other.length);
                 std::copy(other.data, other.data + other.length, temp);
                 free_aligned(data);
                 data = temp;
@@ -91,21 +92,21 @@ namespace Lingebra {
             }
 
             // Overloading stuff
-            double& operator[](std::size_t i) {
+            T& operator[](std::size_t i) {
                 return data[i];
             }
 
-            const double& operator[](std::size_t i) const {
+            const T& operator[](std::size_t i) const {
                 return data[i];
             }
 
-            const double& at(std::size_t i) const {
+            const T& at(std::size_t i) const {
                 if (i >= length) throw std::out_of_range("Index out of bounds");
                 return data[i];
             }
 
-            double* data_ptr() { return data; }
-            const double* data_ptr() const { return data; }
+            T* data_ptr() { return data; }
+            const T* data_ptr() const { return data; }
 
             std::ostream& operator<<(std::ostream& out) {
                 out << '[';

@@ -9,27 +9,28 @@
 
 namespace Lingebra {
 
+    template <typename F>
     class Matrix {
         private:
             std::size_t nrows;
             std::size_t ncols;
-            Vector data;
+            Vector<F> data;
         public:
             static bool lu_decomposition(Matrix& mat, std::vector<std::size_t>& pivots, int& pivot_sign) {
                 if (mat.shape()[0] != mat.shape()[1]) return false;
                 
                 std::size_t n = static_cast<std::size_t>(mat.shape()[0]);
-                double* A = mat.data_ptr();
+                F* A = mat.data_ptr();
                 
                 pivot_sign = 1;
                 for (std::size_t i = 0; i < n; i++) pivots[i] = i;
 
                 for (std::size_t k = 0; k < n; k++) {
-                    double max_val = 0.0;
+                    F max_val = 0.0;
                     std::size_t best_row = k;
                     
                     for (std::size_t i = k; i < n; i++) {
-                        double val = std::abs(A[i * n + k]);
+                        F val = std::abs(A[i * n + k]);
                         if (val > max_val) {
                             max_val = val;
                             best_row = i;
@@ -62,7 +63,7 @@ namespace Lingebra {
             
             Matrix(std::size_t r, std::size_t c) : nrows(r), ncols(c), data(r * c) {}
 
-            Matrix(std::initializer_list<std::initializer_list<double>> input) {
+            Matrix(std::initializer_list<std::initializer_list<F>> input) {
                 nrows = input.size();
                 if (nrows == 0) { ncols = 0; return; } 
 
@@ -71,14 +72,14 @@ namespace Lingebra {
                     if (row_list.size() != ncols)
                         throw std::invalid_argument("Columns should be the same length");
 
-                data = Vector(nrows*ncols);
+                data = Vector<F>(nrows*ncols);
                 std::size_t i = 0;
                 for (auto& row_list: input)
-                    for (double val: row_list)
+                    for (F val: row_list)
                         data[i++] = val;
             }
             
-            Matrix(std::vector<double> input) : nrows(input.size()), ncols(1) {
+            Matrix(std::vector<F> input) : nrows(input.size()), ncols(1) {
                 for (std::size_t i = 0; i < input.size(); i++) {
                     data[i] = input[i];
                 }
@@ -119,15 +120,15 @@ namespace Lingebra {
                 return *this;
             }
             
-            const Vector shape() const noexcept {
-                return Vector{static_cast<double>(nrows), static_cast<double>(ncols)};
+            const Vector<std::size_t> shape() const noexcept {
+                return Vector{static_cast<std::size_t>(nrows), static_cast<std::size_t>(ncols)};
             }
             
-            double* data_ptr() { return data.data_ptr(); }
-            const double* data_ptr() const { return data.data_ptr(); }
+            F* data_ptr() { return data.data_ptr(); }
+            const F* data_ptr() const { return data.data_ptr(); }
 
-            double& operator()(std::size_t i, std::size_t j) { return data[i * ncols + j]; }
-            const double& operator()(std::size_t i, std::size_t j) const { return data[i * ncols + j]; }
+            F& operator()(std::size_t i, std::size_t j) { return data[i * ncols + j]; }
+            const F& operator()(std::size_t i, std::size_t j) const { return data[i * ncols + j]; }
 
             Matrix& operator+=(const Matrix& other) {
                 if (nrows != other.nrows || ncols != other.ncols)
@@ -160,9 +161,9 @@ namespace Lingebra {
                     throw std::invalid_argument("Dimension mismatch: Matrix A cols must equal Matrix B rows.");
 
                 Matrix result(nrows, other.ncols);
-                const double* A_ptr = data.data_ptr();
-                const double* B_ptr = other.data.data_ptr();
-                double* C_ptr = result.data.data_ptr();
+                const F* A_ptr = data.data_ptr();
+                const F* B_ptr = other.data.data_ptr();
+                F* C_ptr = result.data.data_ptr();
 
                 const std::size_t M = nrows;
                 const std::size_t K = ncols;
@@ -172,7 +173,7 @@ namespace Lingebra {
                     const std::size_t row_A = i * K;
                     const std::size_t row_C = i * N;
                     for (std::size_t k = 0; k < K; k++) {
-                        const double r_val = A_ptr[row_A + k];
+                        const F r_val = A_ptr[row_A + k];
                         if (r_val == 0.0) continue; 
                         const std::size_t row_B = k * N;
                         for (std::size_t j = 0; j < N; j++) {
@@ -193,7 +194,7 @@ namespace Lingebra {
                 if (!lu_decomposition(lu, pivots, sign)) return 0.0; 
 
                 double det = static_cast<double>(sign);
-                const double* ptr = lu.data.data_ptr();
+                const F* ptr = lu.data.data_ptr();
                 
                 for (std::size_t i = 0; i < nrows; i++) {
                     det *= ptr[i * ncols + i];
@@ -212,11 +213,11 @@ namespace Lingebra {
                     throw std::runtime_error("Matrix is singular (det=0) and cannot be inverted.");
 
                 Matrix inv(nrows, ncols);
-                const double* lu_ptr = lu.data.data_ptr();
-                double* inv_ptr = inv.data.data_ptr();
+                const F* lu_ptr = lu.data.data_ptr();
+                F* inv_ptr = inv.data.data_ptr();
                 std::size_t n = nrows;
 
-                std::vector<double> b(n);
+                std::vector<F> b(n);
                 
                 for (std::size_t j = 0; j < n; j++) {
                     for (std::size_t i = 0; i < n; i++) {
@@ -265,7 +266,7 @@ namespace Lingebra {
                 for (std::size_t i { 0 }; i < m.nrows; i++) {
                     out << "  [";
                     for (std::size_t j { 0 }; j < m.ncols; j++) {
-                        double val = m.data[i * m.ncols + j];
+                        F val = m.data[i * m.ncols + j];
                         if (std::abs(val) < tolerance) val = 0.0;
                         out << val; 
                         if (j + 1 < m.ncols) out << ", ";
@@ -278,8 +279,5 @@ namespace Lingebra {
             }
     };
 }
-
-
- 
 
 #endif // LINGEBRA_MATRIX_H
