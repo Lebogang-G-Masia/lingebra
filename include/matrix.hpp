@@ -4,8 +4,10 @@
 #include "vector.hpp"
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 namespace Lingebra {
 
@@ -184,6 +186,42 @@ namespace Lingebra {
                 return result;
             }
 
+            Matrix element_wise(const Matrix& other) const {
+                if (nrows != other.nrows || ncols != other.ncols)
+                    throw std::invalid_argument("Dimension mismatch: Matrices should have the same dimsions.");
+
+                Matrix result(nrows, ncols);
+                std::size_t dims = nrows * ncols;
+                for (std::size_t i = 0; i < dims; i++) {
+                    result.data[i] = data[i] * other.data[i];
+                }
+                return result;
+            }
+
+            F sum() const {
+                F total = 0.0;
+                std::size_t dims = nrows * ncols;
+                for (std::size_t i = 0; i < dims; i++)
+                    total += data[i];
+                return total;
+            }
+
+            Matrix map(std::function<F(F)> func) const {
+                Matrix result(nrows, ncols);
+                std::size_t dims = nrows * ncols;
+                for (std::size_t i = 0; i < dims; i++)
+                    result.data[i] = func(data[i]);
+                return result;
+            }
+
+            Matrix sum_rows() const {
+                Matrix result(1, ncols);
+                for (std::size_t i = 0; i < nrows; i++)
+                    for (std::size_t j = 0; j < ncols; j++)
+                        result.data[j] += data[i * ncols + j];
+                return result;
+            }
+
             double determinant() const {
                 if (nrows != ncols) throw std::invalid_argument("Matrix must be square");
 
@@ -279,5 +317,6 @@ namespace Lingebra {
             }
     };
 }
+
 
 #endif // LINGEBRA_MATRIX_H
