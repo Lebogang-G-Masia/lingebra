@@ -186,6 +186,10 @@ namespace Lingebra {
                 return result;
             }
 
+            static Matrix matmul(const Matrix& A, const Matrix& B) {
+                return A.matmul(B);
+            }
+
             Matrix element_wise(const Matrix& other) const {
                 if (nrows != other.nrows || ncols != other.ncols)
                     throw std::invalid_argument("Dimension mismatch: Matrices should have the same dimsions.");
