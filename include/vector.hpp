@@ -1,13 +1,18 @@
 #ifndef LINGEBRA_VECTOR_H
 #define LINGEBRA_VECTOR_H
 
-#include <iostream>
 #include <algorithm>
-#include <stdexcept>
+#include <ostream>
 #include <cstdlib>
+#include <type_traits>
+#include <random>
+#include <stdexcept>
 
 namespace Lingebra {
-    template<typename T>
+    template <typename U>
+    concept Numeric = std::is_arithmetic_v<U>;
+
+    template <Numeric T>
     class Vector {
         private:
             std::size_t length;
@@ -28,14 +33,28 @@ namespace Lingebra {
             void free_aligned(T* ptr) {
                 std::free(ptr);
             }
-        
+
+            T generate_random() {
+                static std::random_device rd;
+                static std::mt19937 gen(rd());
+                std::uniform_real_distribution<T> dist(-1.0f, 1.0f);
+                return static_cast<T>(dist(gen));
+            }
+
         public:
             // Constructors
             Vector() : length(0), data(nullptr) {}
 
-            Vector(std::size_t size) : length(size) {
+            Vector(std::size_t size, bool randomize=false) : length(size) {
                 data = allocate_aligned(size);
-                std::fill(data, data+length, 0.0);
+                if (!randomize)
+                    std::fill(data, data+length, 0.0);
+                else {
+                    std::generate(data, data + length, [this]() {
+                            return generate_random();
+                            });
+                }
+
             }
 
             Vector(std::initializer_list<T> input) : length(input.size()) {
@@ -108,11 +127,11 @@ namespace Lingebra {
             T* data_ptr() { return data; }
             const T* data_ptr() const { return data; }
 
-            std::ostream& operator<<(std::ostream& out) {
+            friend std::ostream& operator<<(std::ostream& out, Vector<T> v) {
                 out << '[';
-                for (std::size_t i { 0 }; i < length; i++) {
-                    out << data[i];
-                    if (i + 1 < length) out << ", ";
+                for (std::size_t i { 0 }; i < v.length; i++) {
+                    out << v.data[i];
+                    if (i + 1 < v.length) out << ", ";
                 }
                 out << ']';
 
