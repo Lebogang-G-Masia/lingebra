@@ -63,7 +63,7 @@ namespace Lingebra {
 
             Matrix() : nrows(0), ncols(0), data(0) {}
             
-            Matrix(std::size_t r, std::size_t c) : nrows(r), ncols(c), data(r * c) {}
+            Matrix(std::size_t r, std::size_t c, bool randomize=false) : nrows(r), ncols(c), data(r * c, randomize) {}
 
             Matrix(std::initializer_list<std::initializer_list<F>> input) {
                 nrows = input.size();
