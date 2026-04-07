@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <immintrin.h>
 
 namespace Lingebra {
 
@@ -135,22 +136,93 @@ namespace Lingebra {
             Matrix& operator+=(const Matrix& other) {
                 if (nrows != other.nrows || ncols != other.ncols)
                     throw std::invalid_argument("Input dimensions should be the same size.");
+                
                 std::size_t total = nrows * ncols;
-                for (std::size_t i = 0; i < total; i++) data[i] += other.data[i];
+                F* a_ptr = data.data_ptr();
+                const F* b_ptr = other.data.data_ptr();
+
+                if constexpr (std::is_same_v<F, float>) {
+                    std::size_t i = 0;
+                    for (; i + 7 < total; i += 8) {
+                        __m256 a = _mm256_load_ps(a_ptr + i);
+                        __m256 b = _mm256_load_ps(b_ptr + i);
+                        __m256 sum = _mm256_add_ps(a, b);
+                        _mm256_store_ps(a_ptr + i, sum);
+                    }
+                    for (; i < total; i++) a_ptr[i] += b_ptr[i];
+                } else if constexpr (std::is_same_v<F, double>) {
+                    std::size_t i = 0;
+                    for (; i + 3 < total; i += 4) {
+                        __m256d a = _mm256_load_pd(a_ptr + i);
+                        __m256d b = _mm256_load_pd(b_ptr + i);
+                        __m256d sum = _mm256_add_pd(a, b);
+                        _mm256_store_pd(a_ptr + i, sum);
+                    }
+                    for (; i < total; i++) a_ptr[i] += b_ptr[i];
+                } else {
+                    for (std::size_t i = 0; i < total; i++) a_ptr[i] += b_ptr[i];
+                }
                 return *this;
             }
 
             Matrix& operator-=(const Matrix& other) {
                 if (nrows != other.nrows || ncols != other.ncols)
                     throw std::invalid_argument("Input dimensions should be the same size.");
+                
                 std::size_t total = nrows * ncols;
-                for (std::size_t i = 0; i < total; i++) data[i] -= other.data[i];
+                F* a_ptr = data.data_ptr();
+                const F* b_ptr = other.data.data_ptr();
+
+                if constexpr (std::is_same_v<F, float>) {
+                    std::size_t i = 0;
+                    for (; i + 7 < total; i += 8) {
+                        __m256 a = _mm256_load_ps(a_ptr + i);
+                        __m256 b = _mm256_load_ps(b_ptr + i);
+                        __m256 diff = _mm256_sub_ps(a, b);
+                        _mm256_store_ps(a_ptr + i, diff);
+                    }
+                    for (; i < total; i++) a_ptr[i] -= b_ptr[i];
+                } else if constexpr (std::is_same_v<F, double>) {
+                    std::size_t i = 0;
+                    for (; i + 3 < total; i += 4) {
+                        __m256d a = _mm256_load_pd(a_ptr + i);
+                        __m256d b = _mm256_load_pd(b_ptr + i);
+                        __m256d diff = _mm256_sub_pd(a, b);
+                        _mm256_store_pd(a_ptr + i, diff);
+                    }
+                    for (; i < total; i++) a_ptr[i] -= b_ptr[i];
+                } else {
+                    for (std::size_t i = 0; i < total; i++) a_ptr[i] -= b_ptr[i];
+                }
                 return *this;
             }
 
             Matrix& operator*=(const double scalar) {
                 std::size_t total = nrows * ncols;
-                for (std::size_t i = 0; i < total; i++) data[i] *= scalar;
+                F* a_ptr = data.data_ptr();
+
+                if constexpr (std::is_same_v<F, float>) {
+                    float s = static_cast<float>(scalar);
+                    __m256 s_vec = _mm256_set1_ps(s);
+                    std::size_t i = 0;
+                    for (; i + 7 < total; i += 8) {
+                        __m256 a = _mm256_load_ps(a_ptr + i);
+                        __m256 prod = _mm256_mul_ps(a, s_vec);
+                        _mm256_store_ps(a_ptr + i, prod);
+                    }
+                    for (; i < total; i++) a_ptr[i] *= s;
+                } else if constexpr (std::is_same_v<F, double>) {
+                    __m256d s_vec = _mm256_set1_pd(scalar);
+                    std::size_t i = 0;
+                    for (; i + 3 < total; i += 4) {
+                        __m256d a = _mm256_load_pd(a_ptr + i);
+                        __m256d prod = _mm256_mul_pd(a, s_vec);
+                        _mm256_store_pd(a_ptr + i, prod);
+                    }
+                    for (; i < total; i++) a_ptr[i] *= scalar;
+                } else {
+                    for (std::size_t i = 0; i < total; i++) a_ptr[i] *= scalar;
+                }
                 return *this;
             }
 
@@ -171,15 +243,38 @@ namespace Lingebra {
                 const std::size_t K = ncols;
                 const std::size_t N = other.ncols;
 
-                for (std::size_t i = 0; i < M; i++) {
-                    const std::size_t row_A = i * K;
-                    const std::size_t row_C = i * N;
-                    for (std::size_t k = 0; k < K; k++) {
-                        const F r_val = A_ptr[row_A + k];
-                        if (r_val == 0.0) continue; 
-                        const std::size_t row_B = k * N;
-                        for (std::size_t j = 0; j < N; j++) {
-                            C_ptr[row_C + j] += r_val * B_ptr[row_B + j];
+                if constexpr (std::is_same_v<F, float>) {
+                    for (std::size_t i = 0; i < M; i++) {
+                        const std::size_t row_A = i * K;
+                        const std::size_t row_C = i * N;
+                        for (std::size_t k = 0; k < K; k++) {
+                            const float r_val = A_ptr[row_A + k];
+                            if (r_val == 0.0f) continue;
+                            __m256 a_vec = _mm256_set1_ps(r_val);
+                            const std::size_t row_B = k * N;
+                            std::size_t j = 0;
+                            for (; j + 7 < N; j += 8) {
+                                __m256 b_vec = _mm256_load_ps(B_ptr + row_B + j);
+                                __m256 c_vec = _mm256_load_ps(C_ptr + row_C + j);
+                                c_vec = _mm256_fmadd_ps(a_vec, b_vec, c_vec);
+                                _mm256_store_ps(C_ptr + row_C + j, c_vec);
+                            }
+                            for (; j < N; j++) {
+                                C_ptr[row_C + j] += r_val * B_ptr[row_B + j];
+                            }
+                        }
+                    }
+                } else {
+                    for (std::size_t i = 0; i < M; i++) {
+                        const std::size_t row_A = i * K;
+                        const std::size_t row_C = i * N;
+                        for (std::size_t k = 0; k < K; k++) {
+                            const F r_val = A_ptr[row_A + k];
+                            if (r_val == 0.0) continue; 
+                            const std::size_t row_B = k * N;
+                            for (std::size_t j = 0; j < N; j++) {
+                                C_ptr[row_C + j] += r_val * B_ptr[row_B + j];
+                            }
                         }
                     }
                 }
